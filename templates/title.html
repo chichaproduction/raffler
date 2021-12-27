@@ -1,0 +1,78 @@
+{% extends "mainframe.html" %} 
+{% block contentframe %} 
+<div>
+  <div class="row" style=" justify-content: center; align-items: center;">
+    <img src="/static/src/images/title.png" alt="Title" width="100%" height="100%">
+  </div>
+  <div class="row" style=" justify-content: center; align-items: center;">
+    <!-- <div class="col text-center">
+      <button type="button" class="btn btn-danger btn-lg btn-block">CLEAR ALL DATA</button>
+    </div>
+    <div class="col text-center">
+      <button type="button" class="btn btn-warning btn-lg btn-block" data-toggle="modal" data-target="#uploadModal">UPLOAD</button>
+    </div> -->
+    <div class="col text-center">
+      <form action="/raffler" method="get" enctype="multipart/form-data">
+        <button type="submit" class="btn btn-success btn-lg btn-block">RAFFLE !</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="uploadModalLabel">UPLOAD DATA</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="card">
+          <div class="card-header">
+            Upload Participants
+          </div>
+          <div class="card-body">
+              <form action="/participant_upload" method="post" enctype="multipart/form-data">
+                  <input type="file" name="participants" />
+                  <input type="submit" />
+              </form>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            Upload Prizes
+          </div>
+          <div class="card-body">
+              <form action="/prize_upload" method="post" enctype="multipart/form-data">
+                  <input type="file" name="prizes" />
+                  <input type="submit" />
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="noFileModal" tabindex="-1" role="dialog" aria-labelledby="noFileModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content" style="background-color: red;">
+      <div class="modal-body text-center">
+        <b style="color: white;">NO CSV DETECTED / INVALID INPUT !</b>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if postres == False %}
+  <script>
+      $('#noFileModal').modal('show'); 
+  </script>
+{% endif %}
+{% endblock %}
+

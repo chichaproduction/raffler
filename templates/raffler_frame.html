@@ -1,0 +1,181 @@
+{% extends "mainframe.html" %} 
+{% block contentframe %}
+
+{% set global_prize_index = 0 %}
+{% set name = "name" %}
+<!-- <div>
+  <div class="row" style=" justify-content: center; align-items: center;">
+    <button type="button" class="btn btn-success btn-lg btn-block">RAFFLE!</button>
+  </div>
+</div> -->
+<div>
+  <div class="row" style="height:100% !important; justify-content: center; align-items: center; color: rgb(24, 7, 116);">
+    <!-- <h1 id="prize_name">{{ prizes[global_prize_index].code }} - {{ prizes[global_prize_index].name }}</h1> -->
+    <h1 style="font-size: 100px" id="prize_name"></h1>
+  </div>
+  <div class="row" style=" justify-content: center; align-items: center;">
+    <!-- <h1 style="font-size: 100px">{{ participants[0].l_name }}, {{ participants[0].f_name }}</h1> -->
+    <h1 style="font-size: 100px" id="participants_name"></h1>
+  </div>
+
+  <div class="row" style=" justify-content: center; align-items: center;">
+    <button id="rollbutton" type="button" class="btn btn-success btn-lg btn-block" onclick="roll()">RAFFLE!</button>
+    <button id="resultbutton" type="button" class="btn btn-warning btn-sm btn-block" onclick="toggle_results()">CHECK RESULTS</button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="resultsModal" tabindex="-1" role="dialog" aria-labelledby="resultsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title" id="resultsModalLabel">RESULTS</h1>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table id="resulttable" class="table">
+          <thead>
+            <tr>
+              <th scope="col">Code</th>
+              <th scope="col">Name</th>
+            </tr>
+          </thead>
+          <tbody id="resulttablebody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  body{
+    padding-top: 6% !important;
+    padding-left: 20% !important;
+    padding-right: 20% !important;
+    padding-bottom: 6% !important;
+  }
+</style>
+
+<script>
+var participants_json = '{{ participants | tojson | safe }}';
+var prizes_json = '{{ prizes | tojson | safe }}';
+
+const participants = JSON.parse(participants_json);
+const prizes = JSON.parse(prizes_json);
+
+var global_prizes_index = -1
+var global_participants_index = 0
+
+var results = [];
+function roll() {
+global_prizes_index ++;
+
+try {
+  document.getElementById("prize_name").innerHTML = prizes[global_prizes_index].code;
+  document.getElementById("rollbutton").disabled = true;
+  document.getElementById("resultbutton").disabled = true;
+}
+catch(err) {
+  document.getElementById("prize_name").innerHTML = "NO PRIZE AVAILABLE!";
+  document.getElementById("rollbutton").disabled = true;
+  document.getElementById("resultbutton").disabled = true;
+}
+
+
+let remaining_participants_id = []
+
+Object.keys(participants).forEach(key => {
+  remaining_participants_id.push(key)
+})
+
+
+remaining_participants_id_length = remaining_participants_id.length;
+
+
+
+const timer = ms => new Promise(res => setTimeout(res, ms))
+
+async function load () { // We need to wrap the loop into an async function for this to work
+  for(let i = 1 ; i <= 30; i ++){
+
+    get_random(remaining_participants_id)
+
+    global_participants_index = get_random(remaining_participants_id);
+    document.getElementById("participants_name").innerHTML = participants[global_participants_index].l_name + ", " + participants[global_participants_index].f_name;
+    await timer(100); // then the created Promise can be awaited
+  }
+
+  let winner = {
+    'code':  prizes[global_prizes_index].code,
+    'winner':  participants[global_participants_index].l_name + ", " + participants[global_participants_index].f_name
+  }
+
+  remaining_participants_id.splice(global_participants_index, 1);
+
+  let param_name = participants[global_participants_index].l_name + ", " + participants[global_participants_index].f_name;
+  let removablekey = 0;
+  Object.keys(participants).forEach(keypart => {
+    // console.log(participants[keypart].l_name)
+    let loop_name = participants[keypart].l_name + ", " + participants[keypart].f_name;
+    console.log(loop_name)
+    if(param_name == loop_name){
+      removablekey = keypart
+    }
+  })
+  participants.splice(removablekey, 1);
+
+  console.log(participants);
+  console.log(remaining_participants_id);
+
+  results.push(winner);
+  document.getElementById("rollbutton").disabled = false;
+  document.getElementById("resultbutton").disabled = false;
+}
+
+load();
+
+
+
+
+// results.push(winner);
+
+
+
+}
+
+
+function get_random (list) {
+  return list[Math.floor((Math.random()*list.length))];
+}
+
+function toggle_results(){
+  $('#resultsModal').modal('toggle')
+  
+
+  $("#resulttable tbody tr").remove();
+  Object.keys(results).forEach(keyres => {
+    
+    tablebody = document.getElementById('resulttablebody');
+    tr = document.createElement('tr');
+    td_1 = document.createElement('td');
+    td_2 = document.createElement('td');
+    td_1.innerHTML = results[keyres].code;
+    td_2.innerHTML = results[keyres].winner;
+    tr.appendChild(td_1);
+    tr.appendChild(td_2);
+    tablebody.appendChild(tr);
+  })
+}
+
+
+
+  
+
+</script>
+
+
+{% endblock %}
+
